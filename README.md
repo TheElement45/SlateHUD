@@ -1,5 +1,10 @@
 # SlateHUD Rainmeter Suite (v2.4)
 
+[![CI](https://github.com/TheElement45/SlateHUD/actions/workflows/ci.yml/badge.svg)](https://github.com/TheElement45/SlateHUD/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/TheElement45/SlateHUD)](https://github.com/TheElement45/SlateHUD/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue)](#requirements)
+
 A lightweight, translucent desktop HUD dashboard suite for **Rainmeter** (Windows) featuring real-time CPU/GPU/RAM telemetry, Windows SMTC media controls, network & storage monitoring, a 4-mode audio spectrum visualizer, searchable app & game launchers, and a multi-page notes/checklist widget.
 
 ---
@@ -156,6 +161,12 @@ SlateHUD/
     ├── Notes.lua / NotesData.lua / Visualizer.lua
     └── Cache/                    # Ephemeral runtime snapshots, icons, locks & JSON caches (git-ignored)
 ```
+
+---
+
+## 🤖 AI-Assisted Development
+
+Portions of the codebase, documentation, and test suites in SlateHUD were developed and refined with AI coding assistants under human direction, review, and testing. Release binaries (`SlateHUDHelper.exe` and `SlateHUD.dll`) are built transparently in GitHub Actions and covered by the automated regression suites in [`Tests/`](Tests/) and [SECURITY.md](SECURITY.md).
 
 ---
 
