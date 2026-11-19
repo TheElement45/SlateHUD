@@ -1,0 +1,56 @@
+# Runtime cache written by SlateHUDHelper.exe / ScanGames.ps1 (regenerated automatically)
+@Resources/Cache/
+
+# Compiled binaries & third-party plugins (built via @Resources/build.ps1 or distributed in Releases)
+@Resources/SlateHUDHelper.exe
+@Resources/Plugins/SlateHUD.dll
+@Resources/Plugins/FrostBehind.dll
+@Resources/Plugins/FrostedGlass.dll
+
+# Old helper and native build artifacts
+*.exe.bak
+*.dll.bak
+*.obj
+*.lib
+*.exp
+*.pdb
+*.rmskin
+dist/
+@Resources/.tmp-plugin-*/
+@Resources/SlateHUDHelper.review-*.exe
+
+# Editor / OS noise
+.vscode/
+.vs/
+Thumbs.db
+desktop.ini
+*.tmp
+*.TMP
+
+# Personal notes and active-tab state (created/updated by the Notes skin; defaults live in Notes/Defaults.inc)
+Notes/Data/
+Notes/Settings.inc
+
+# Personal Game Hub favorites
+Games/Favorites.txt
+Games/Favorites.txt.bak
+Games/GameList.inc
+Games/GameList.inc.bak
+Games/View.inc
+Games/Recent.txt
+Games/Recent.txt.bak
+Games/Preferences.txt
+Games/Preferences.txt.bak
+
+# Generated app launcher catalog and saved expanded group
+Apps/Catalog.inc
+Apps/Catalog.inc.bak
+Apps/View.inc
+Apps/Preferences.txt
+Apps/Preferences.txt.bak
+
+# Shared user overrides (created at runtime by menu toggles / settings; keeps Variables.inc clean)
+@Resources/UserSettings.inc
+
+# Isolated regression-test output (also cleaned by the test runner)
+Tests/.scratch-*/

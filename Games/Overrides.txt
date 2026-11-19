@@ -1,0 +1,18 @@
+# ==============================================================================
+# Game Hub Overrides (Optional)
+# ==============================================================================
+# One rule per line (lines starting with # are ignored):
+#   MatchFolderOrTitle | DisplayTitle | Category | CustomExeOrURI | Arguments | WorkingDirectory
+#
+# Categories: RPG, ACTION, STRATEGY, OTHER, HIDE
+# Leave any field blank to keep the auto-detected value.
+# Arguments and WorkingDirectory are optional; existing four-field rules still work.
+# Relative executable and working-directory paths resolve against the game folder.
+# The executable's directory is used when WorkingDirectory is blank.
+# Example: My Game | My Game | ACTION | launcher.exe | --profile "Player One" | .
+#
+# Examples:
+#   ACE COMBAT 8 - WINGS OF THEVE | ACE COMBAT 8 | ACTION |
+#   Call of Duty - Modern Warfare 4 | Call of Duty: MW | ACTION |
+#   SomeFolderToIgnore | | HIDE |
+# ==============================================================================

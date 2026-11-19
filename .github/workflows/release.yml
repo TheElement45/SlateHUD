@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version without v prefix (e.g. 2.4.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve release version
+        id: meta
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $raw = if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            '${{ inputs.version }}'
+          } else {
+            '${{ github.ref_name }}'
+          }
+          $ver = $raw.Trim().TrimStart('v', 'V')
+          if ($ver -notmatch '^[0-9A-Za-z._-]+$') {
+            throw "Invalid version string: $raw"
+          }
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "tag=v$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Build SlateHUDHelper.exe and SlateHUD.dll
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & powershell -NoProfile -ExecutionPolicy Bypass -File "@Resources\build.ps1"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run PowerShell & helper regression suites
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($suite in @(
+            'Tests\ThemeRegression.ps1',
+            'Tests\AppDiscoveryRegression.ps1',
+            'Tests\AppScanRegression.ps1',
+            'Tests\Regression.ps1'
+          )) {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $suite
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Set up Python 3.12 (x64)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: 'x64'
+
+      - name: Install lupa (Lua 5.1) and run Lua widget tests
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m pip install --target Tests/.scratch-lua-runtime lupa
+          python Tests\WidgetRegression.py
+
+      - name: Package release archive and checksums
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ver = '${{ steps.meta.outputs.version }}'
+          & powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\PackageRelease.ps1" -Version $ver
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path "dist\SlateHUD-v$ver-win64.zip"))
+          try {
+            $entries = @($zip.Entries | ForEach-Object { $_.FullName -replace '\\', '/' })
+          } finally {
+            $zip.Dispose()
+          }
+          $forbiddenPattern = '(?i)(^|/)(\.git|Tests|scripts|@Resources/Cache|@Resources/UserSettings\.inc|Notes/Data|Notes/Settings\.inc|Games/GameList\.inc|Games/Favorites\.txt|Games/Recent\.txt|Games/Preferences\.txt|Games/View\.inc|Apps/Catalog\.inc|Apps/Preferences\.txt|Apps/View\.inc|FrostBehind\.dll|FrostedGlass\.dll)|(\.(tmp|bak|obj|lib|exp|pdb)$)'
+          $leaks = @($entries | Where-Object { $_ -match $forbiddenPattern })
+          if ($leaks.Count -gt 0) {
+            throw ("Forbidden entries found in release archive: " + ($leaks -join ', '))
+          }
+
+      - name: Create GitHub Release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ver = '${{ steps.meta.outputs.version }}'
+          $tag = '${{ steps.meta.outputs.tag }}'
+          $zip = "dist\SlateHUD-v$ver-win64.zip"
+          $sums = "dist\SHA256SUMS.txt"
+          gh release create $tag $zip $sums --target "${{ github.sha }}" --title "SlateHUD $tag" --generate-notes
